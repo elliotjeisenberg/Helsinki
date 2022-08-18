@@ -12,6 +12,31 @@ const FeedbackButton = ({ handleClick, text }) => (
     </button>
 )
 
+const StatisticsLine = ({ text, value}) => {
+    return <tr><td>{text}</td><td>{value}</td></tr>
+}
+
+const Statistics = ({ good, neutral, bad }) => {
+    const total = good + neutral + bad
+    if (total === 0) {
+        return <p>There are no stats to display</p>
+    } else {
+        return (
+            <div>
+                <h2>Statistics</h2>
+                <table>
+                    <StatisticsLine text="Good" value={good} />
+                    <StatisticsLine text="Neutral" value={neutral} />
+                    <StatisticsLine text="Bad" value={bad} />
+                    <StatisticsLine text="All" value={total} />
+                    <StatisticsLine text="Average" value={(good - bad) / total} />
+                     <StatisticsLine text="Positive" value={((good / total * 100)).toString() + "%"} />
+                </table>   
+            </div>
+        )
+    }
+}
+
 const App = () => {
 
     const [good, setGood] = useState(0)
@@ -36,13 +61,7 @@ const App = () => {
             <FeedbackButton handleClick={() => handleClick("good")} text="good" />
             <FeedbackButton handleClick={() => handleClick("neutral")} text="neutral" />
             <FeedbackButton handleClick={() => handleClick("bad")} text="bad" />
-            <h2>Statistics</h2>
-            <p>Good {good}</p>
-            <p>Neutral {neutral}</p>
-            <p>Bad {bad}</p>
-            <p>All {good + neutral + bad}</p>
-            <p>Average { (good - bad) / (good + bad + neutral) }</p>
-            <p>Positive {good / (good + neutral + bad)* 100 }%</p>
+            <Statistics good={good} neutral={neutral} bad={ bad } />
         </div>
 
     )
