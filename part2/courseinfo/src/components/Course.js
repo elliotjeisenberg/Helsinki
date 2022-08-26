@@ -1,3 +1,5 @@
+import { useReducer } from "react"
+
 const Header = ({ course }) => <h1>{course}</h1>
 
 const Total = ({ sum }) => <p>Number of exercises {sum}</p>
@@ -7,26 +9,25 @@ const Part = ({ part }) =>
     {part.name} {part.exercises}
   </p>
 
-const Content = ({ parts }) => 
-  <>
-    <Part
-      part={parts[0]} 
-    />
-    <Part
-      part={parts[1]} 
-    />
-    <Part
-      part={parts[2]} 
-    />      
-  </>
+const Content = ({ parts }) => {
+  return(
+    <div>
+        {parts.map(part => {
+            return <Part key={part.id} part={part} />
+        })}
+    </div>
+  )
+}
 
 const Course = function ({course}) {
-    console.log(course.id,course.name,course.parts)
+
     return (
         <div>
             <Header course={course.name} />
             <Content parts={course.parts} />
-            <Total sum={course.parts[0].exercises + course.parts[1].exercises + course.parts[2].exercises} />
+            <Total sum={course.parts.reduce(function(sum,part) {
+                return sum += part.exercises
+            },0)} />
         </div>
     );
 }
