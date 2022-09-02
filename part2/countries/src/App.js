@@ -1,41 +1,55 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, StrictMode } from 'react';
 import axios from 'axios';
-import CountryOutput from './components/CountryOutput';
+import Display from './components/Display'
+
+
+const Search = (props) => {
+  return <div>find countries <input onChange={props.onInputChange} value={props.search} /></div>
+}
 
 function App() {
 
-  const [country, setCountry] = useState('')
-  const [countries, setCountries] = useState([])
+  const [search, setSearch] = useState('')
   const [data, setData] = useState([])
-  const [selected, setSelected] = useState([])
+  const [countries, setCountries] = useState([])
 
-  useEffect(()=>{
-    axios
-      .get('https://restcountries.com/v3.1/all')
-      .then(res => {
-        setData(res.data)
-      })
-  },[])
-  
-
-  const filterCountries = (arr, sub) => {
-    return arr.filter(c => {
-      return c.name.common.search(sub) >= 0
+  useEffect(() => {
+    axios.get('https://restcountries.com/v3.1/all')
+    .then(res => {
+      setData(res.data)
     })
+  },[])
+
+  const handleInputChange = (e) => {
+    setSearch(e.target.value.toUpperCase())
+    setCountries(findCountries(data,e.target.value.toUpperCase()))
   }
 
-  const handleChange = e => {
-    setCountry(e.target.value)
-    setCountries(filterCountries(data,e.target.value))
+  const stringMatch = (str, sear) => {
+    return str.toUpperCase().search(sear.toUpperCase()) >= 0 ? true : false
   }
 
- 
+  const findCountries = (arr, str) => {
     return (
-      <div className="App">
-        <input onChange={handleChange}  value={country}/>
-        <CountryOutput countries={countries} handleSelection={ e => setSelected(e.target.value)} />
-      </div>
+      arr.filter((country) => {
+        return stringMatch(country.name.common, str)
+      })
     )
-};
+  }
+
+  const selectCountry = (e) => {
+    setCountries(e)
+  }
+
+  console.log(process.env.REACT_APP_TITLE)
+
+  return ( 
+    <div>
+      <Search onInputChange={handleInputChange} search={search} />
+      <button onClick={() => setCountries(Array(0))}>reset</button>
+      <Display selectCountry={selectCountry} countries={countries} />
+    </div>
+   );
+}
 
 export default App;
