@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import axios from 'axios'
 import Listing from './components/Listing.js'
 import personService from './services/persons.js'
+import Notification from './components/Notification.js';
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
+  const [message, setMessage] = useState({type:null, content:null})
 
   useEffect(() => {
     personService.getAll()
@@ -30,8 +32,17 @@ const App = () => {
             console.log('getAll returned')
             setPersons(people)
           })
+
+          createMessage({type:'success', content:`Updated phone number for ${newPerson.name}`})
         }
         )
+        .catch( (error) => {
+            createMessage({type:'error', content:`${newPerson.name} has already been deleted from the phonebook`})
+            console.log(error)
+            setPersons(persons.filter(n => n.name !== newName))
+          }
+        )
+        // Create updated message
       }
     } else {
       //Name does not yet exist. Create new entry
@@ -42,6 +53,8 @@ const App = () => {
           setPersons(persons.concat(newPerson))
           setNewName('')
           setNewNumber('')
+
+          createMessage({type:'success', content:`Created entry for ${newName}`})
         })
         .catch( err => console.log(err) )
     }
@@ -55,6 +68,13 @@ const App = () => {
     setNewNumber(e.target.value)
   }
 
+  const createMessage = (e) => {
+    setMessage({type:e.type, content:e.content})
+    setTimeout(() => {
+      setMessage({type:null, content:null})
+    }, 5000)
+  }
+
   const handleDelete = (id, name) => {
     if (window.confirm(`Do you really want to delete ${name} from the phonebook?`)){
         personService.deletePerson(id)
@@ -62,12 +82,15 @@ const App = () => {
           personService.getAll().then( people => {
             setPersons(people)
           })
+
+          createMessage({type:'success', content:`Deleted ${name} from the phonebook`})
     })
       }
     }
   
   return (
     <div>
+      <Notification notification={message} />
       <h2>Phonebook</h2>
       <form onSubmit={handleSubmit}>
         <div>
